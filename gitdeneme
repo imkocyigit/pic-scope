@@ -1,0 +1,5 @@
+git init : dosyayı git dosyası yap.
+git status: durumu göster
+git add file : file'ı geçişe ekle
+git commit -m "mesaj": commit ederek yükle
+git diff: değişikliği gösterir. yeşil yeni kırmızı eski durum.
