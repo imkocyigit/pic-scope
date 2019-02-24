@@ -1,0 +1,101 @@
+/* 
+ * File:   ledy.c
+ * Author: mete
+ *
+ * Created on January 29, 2019, 9:39 AM
+ */
+#include <pic18f4550.h>
+#include <stdio.h>
+#include <xc.h>
+#pragma config PLLDIV = 5 , CPUDIV = OSC1_PLL2 , USBDIV = 2
+#pragma config FOSC = INTOSCIO_EC
+#pragma config FCMEN = OFF                                 
+#pragma config BORV = 3
+#pragma config WDT = OFF
+#pragma config CPB = OFF
+#pragma config CPD = OFF
+
+void delayzz(void)  {
+    int i, j;
+    for(i=0;i<350;i++) {
+        for(j=0;j<2;j++)    {           /* Well its Just a Timer */           
+        }    
+    }   
+}
+
+
+/*
+ * 
+ */
+void main(void) {
+
+    TRISBbits.TRISB0 = 0; //led, debug için. Noktanin karsisindaki taraf.
+    
+    //TRISAbits.TRISA4 = 0;
+    //TRISBbits.TRISB2 = 1;
+    
+    
+    TRISBbits.TRISB3 = 1;
+    TRISBbits.TRISB4 = 1;
+    TRISAbits.TRISA3 = 0;
+    TRISAbits.TRISA2 = 0;
+
+    ADCON0bits.ADON = 0;
+    ADCON1 = 0x0F;
+    INTCONbits.RBIE = 1;
+    
+    //INTCON2bits.RBPU = 1;
+    
+    
+    CCP1CONbits.CCP1M3 = 0;
+    CCP1CONbits.CCP1M2 = 0;
+    CCP1CONbits.CCP1M1 = 0;
+    CCP1CONbits.CCP1M0 = 1;
+    
+    CCP2CONbits.CCP2M3 = 0;
+    CCP2CONbits.CCP2M2 = 0;
+    CCP2CONbits.CCP2M1 = 0;
+    CCP2CONbits.CCP2M0 = 1;
+    LATBbits.LATB0 = 1;
+    LATAbits.LATA3=1;
+    short int pinprev1;
+    
+    while (1)   {
+        
+        
+        //LATAbits.LATA4=PORTBbits.RB2;
+        
+        pinprev1 = PORTBbits.RB3;
+        delayzz();
+        
+        if(PORTBbits.RB3)
+        {
+            LATAbits.LATA3=LATAbits.LATA3;
+        }   else if (pinprev1 == PORTBbits.RB3){
+                
+                if (PORTBbits.RB3) {
+                    LATAbits.LATA3=1;
+                }
+                        
+        }   else {
+            delayzz();
+            LATAbits.LATA3=~LATAbits.LATA3;
+
+        } 
+        
+        
+        
+        if(PORTBbits.RB4)
+        {
+            LATAbits.LATA2=1;
+        }   else  
+        {
+            
+            LATAbits.LATA2=0;
+
+        } 
+       
+    }
+    
+}
+

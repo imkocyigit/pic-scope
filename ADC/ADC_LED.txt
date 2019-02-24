@@ -1,0 +1,80 @@
+/* 
+ * File:   ledy.c
+ * Author: mete
+ *
+ * Created on January 29, 2019, 9:39 AM
+ */
+#include <pic18f4550.h>
+#include <stdio.h>
+#include <xc.h>
+#define _XTAL_FREQ = 4000000; // xtal freq assigned as 4MHz.
+#pragma config PLLDIV = 5 , CPUDIV = OSC1_PLL2 , USBDIV = 2
+#pragma config FOSC = INTOSCIO_EC
+#pragma config FCMEN = OFF                                 
+#pragma config BORV = 3
+#pragma config WDT = OFF
+#pragma config LVP = OFF
+#pragma config CPB = OFF
+#pragma config CPD = OFF
+
+void delayzz(void)  {
+    int i, j;
+    for(i=0;i<500;i++) {
+        for(j=0;j<2;j++)    {           /* Well its Just a Timer */           
+        }    
+    }   
+}
+
+void main(void) {
+
+    int result=0;
+    TRISAbits.TRISA0=1; // Analog giris input olarak ayarlandi.
+     
+    TRISBbits.TRISB1=0; // PORT B'nin 1-5 pinleri çikis olarak kullanilacak.
+    TRISBbits.TRISB2=0;
+    TRISBbits.TRISB3=0;
+    TRISBbits.TRISB4=0;
+    TRISBbits.TRISB5=0;
+    INTCONbits.RBIE = 1;
+    
+    ADCON0=0b00000000; //Channel 0 (AN0)selected. ADC is disabled.
+    ADCON1=0b00001110; // AN0 set as analog and VREFs set as Vdd and Vss.
+    ADCON2=0b10001100; //Right justified. 4TOSC(FOSC/4). 2Tad.
+    
+    ADCON0bits.ADON = 1; // ADC enabled.
+    
+   
+     
+    while (1)   {
+        
+        delayzz(); // Required time for Acquisition.
+       
+        ADCON0bits.GO=1; // Bu bit 1 oldugu sürece çevirim bitmedi demek.
+        
+        while(ADCON0bits.GO == 1){}; // wait for conversion.
+        
+        result = (ADRESH<<8)+ADRESL;
+        
+        if (result> 512 ) {
+            LATBbits.LATB1=1;
+        }   else LATBbits.LATB1=0;
+        
+        if (result> 750) {
+            LATBbits.LATB5=1;
+        }   else LATBbits.LATB5=0;
+        
+        if (result> 511 && result < 750) {
+            LATBbits.LATB4=1;
+        }   else LATBbits.LATB4=0;
+        
+        if (result> 255 && result < 511) {
+            LATBbits.LATB3=1;
+        }   else LATBbits.LATB3=0;
+        
+        if (result> 0 && result < 255) {
+            LATBbits.LATB2=1;
+        }   else LATBbits.LATB2=0;
+    }
+    
+}
+

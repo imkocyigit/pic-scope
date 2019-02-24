@@ -1,0 +1,76 @@
+/* 
+ * File:   ledy.c
+ * Author: mete
+ *
+ * Created on January 29, 2019, 9:39 AM
+ */
+#include <pic18f4550.h>
+#include <stdio.h>
+#include <xc.h>
+#define _XTAL_FREQ = 4000000; // xtal freq assigned as 4MHz.
+#pragma config PLLDIV = 5 , CPUDIV = OSC1_PLL2 , USBDIV = 2
+#pragma config FOSC = INTOSCIO_EC
+#pragma config FCMEN = OFF                                 
+#pragma config BORV = 3
+#pragma config WDT = OFF
+#pragma config LVP = OFF
+#pragma config CPB = OFF
+#pragma config CPD = OFF
+
+
+
+void delayzz(void)  {
+    int i, j;
+    for(i=0;i<500;i++) {
+        for(j=0;j<2;j++)    {           /* Well its Just a Timer */           
+        }    
+    }   
+}
+
+void main(void) {
+
+    short adcVal = 0;
+    
+    TRISAbits.TRISA0=1; // Analog input pini olarak ayarland?.
+        
+    
+    TRISCbits.TRISC2=0; // P1A as output
+    TRISDbits.TRISD5=0; //P1B as output
+
+    CCP1CON = 0b10001100; // Half bridge (P1A,P1B) modulated. A active high, B active low.    
+    
+    PR2= 0xFF;  // Period of timer 2. For 5kHz
+    TMR2 = 0X00;  // Timer2's initial value set as 0F.
+    T2CONbits.T2CKPS0 = 1;  //Prescaler value is 16
+    T2CONbits.T2CKPS1 = 1;  //Prescaler value is 16
+    
+    ADCON0=0b00000000; //Channel 0 (AN0)selected. ADC is disabled.
+    ADCON1=0b00001110; // AN0 set as analog and VREFs set as Vdd and Vss.
+    ADCON2=0b10001100; //Right justified. 4TOSC(FOSC/4). 2Tad.
+    
+    ADCON0bits.ADON = 1; // ADC enabled.
+    
+   
+     
+    while (1)   {
+        
+        delayzz(); // Required time for Acquisition.
+       
+        ADCON0bits.GO=1; // Bu bit 1 oldu?u sürece çevirim bitmedi demek.
+        
+        while(ADCON0bits.GO == 1){}; // wait for conversion.
+        
+        adcVal = (ADRESH<<8)+ADRESL;
+        
+        CCPR1L = adcVal >> 2;
+        CCP1CON &= 0xCF; // 5,4 bits set as 0
+        CCP1CON |= ((adcVal<<4)&0x30);
+        
+        //TMR2 = 0X0F;
+        T2CONbits.TMR2ON = 1;
+        
+       
+        
+    }
+
+}
